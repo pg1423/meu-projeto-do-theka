@@ -44,50 +44,34 @@
             <div class="destaque-texto">
                 <h1 id="titulo-destaques"><span class="titulo-desktop">Novidades<br>da semana</span><span class="titulo-mobile">Novidade da semana</span></h1>
                 <div class="destaque-descricao" aria-live="polite">
-                    <p class="destaque-titulo" id="destaque-titulo">A cabeça do santo</p>
-                    <p class="destaque-autor" id="destaque-autor">Socorro Acioli - 2014</p>
+                    <p class="destaque-titulo" id="destaque-titulo"></p>
+                    <p class="destaque-autor" id="destaque-autor"></p>
                 </div>
             </div>
-            <div class="destaque-livros" id="destaque-livros" role="group" aria-label="Livros em destaque"><div class="destaque-livro ativo" aria-hidden="true"><div class="capa"></div></div><div class="destaque-livro" aria-hidden="true"><div class="capa"></div></div><div class="destaque-livro" aria-hidden="true"><div class="capa"></div></div><div class="destaque-livro" aria-hidden="true"><div class="capa"></div></div><div class="destaque-livro" aria-hidden="true"><div class="capa"></div></div></div>
+            <div class="destaque-livros" id="destaque-livros" role="group" aria-label="Livros em destaque"></div>
         </section>
         <section class="catalogo" id="catalogo" aria-labelledby="titulo-catalogo">
             <h2 id="titulo-catalogo">Veja nosso catálogo</h2>
             <form class="filtros" id="form-busca" role="search">
                 <label class="busca">
                     <span class="sr-only">Pesquisar por título ou autor</span>
-                    <input id="busca" type="search" placeholder="Fazer busca" autocomplete="off" maxlength="180" disabled>
+                    <input id="busca" type="search" placeholder="Fazer busca" autocomplete="off" maxlength="180">
                 </label>
-                <button class="botao buscar-submit" disabled type="submit"><span>Buscar</span> <svg class="icone" aria-hidden="true"><use href="#icone-busca"/></svg></button>
+                <button class="botao buscar-submit" type="submit"><span>Buscar</span> <svg class="icone" aria-hidden="true"><use href="#icone-busca"/></svg></button>
                 <div class="filtros-opcoes" id="filtros-opcoes">
                     <h3>Filtros</h3>
-                    <label class="sr-only" for="categoria">Gênero</label><select id="categoria" name="categoria" disabled><option value="">Gênero</option></select>
-                    <label class="sr-only" for="editora">Editora</label><select id="editora" name="editora" disabled><option value="">Editora</option></select>
-                    <button class="botao aplicar-filtros" disabled type="submit">Aplicar</button>
+                    <label class="sr-only" for="categoria">Gênero</label><select id="categoria" name="categoria"><option value="">Gênero</option></select>
+                    <label class="sr-only" for="editora">Editora</label><select id="editora" name="editora"><option value="">Editora</option></select>
+                    <button class="botao aplicar-filtros" type="submit">Aplicar</button>
                 </div>
-                <button class="abrir-filtros botao" disabled id="abrir-filtros" type="button" aria-label="Abrir filtros" aria-controls="filtros-opcoes" aria-expanded="false"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v7l-4-2v-5Z"/></svg></button>
+                <button class="abrir-filtros botao" id="abrir-filtros" type="button" aria-label="Abrir filtros" aria-controls="filtros-opcoes" aria-expanded="false"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v7l-4-2v-5Z"/></svg></button>
             </form>
             <div class="resultado-barra">
                 <p class="sr-only" id="resultados" role="status" aria-live="polite"></p>
                 <button class="link-botao" id="limpar-busca" type="button" hidden>Limpar busca</button>
             </div>
             <div class="catalogo-grade">
-                <div class="grade-livros" id="grade-livros">
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                    <article class="livro"><div class="livro-capa"><div class="capa" role="img" aria-label="Espaço reservado para livro"></div></div></article>
-                </div>
+                <div class="grade-livros" id="grade-livros"></div>
                 <button class="adicionar-livro" id="adicionar" type="button" disabled aria-label="Adicionar material" title="Adicionar material"><span aria-hidden="true">+</span></button>
             </div>
             <div class="vazio" id="vazio" hidden>
@@ -125,5 +109,6 @@
         <p class="rodape-creditos">Mockup desenvolvido por EJECT</p>
     </footer>
 
+    <noscript><p class="sem-js">Ative o JavaScript para pesquisar os livros.</p></noscript>
 </body>
 </html>
