@@ -12,11 +12,20 @@ const criar = (tag, classe, conteudo) => {
 const livros = livrosIniciais.map(livro => ({ ...livro }));
 let pagina = 1;
 let destaque = 0;
+let livroAberto = null;
+let acionadorModal;
 
 function criarCapa(livro) {
     const capa = criar("div", "capa");
     capa.setAttribute("aria-hidden", "true");
-    capa.append(criar("span", "capa-titulo", livro.titulo));
+    if (livro.capa) {
+        const imagem = criar("img");
+        imagem.src = livro.capa.startsWith("data:") ? livro.capa : `../assets/acervo/${livro.capa}`;
+        imagem.alt = "";
+        imagem.loading = "lazy";
+        imagem.addEventListener("error", () => { imagem.remove(); capa.append(criar("span", "capa-titulo", livro.titulo)); }, { once: true });
+        capa.append(imagem);
+    } else capa.append(criar("span", "capa-titulo", livro.titulo));
     return capa;
 }
 
@@ -46,9 +55,11 @@ function renderizarCatalogo() {
     const inicio = (pagina - 1) * porPagina;
     $("grade-livros").replaceChildren(...lista.slice(inicio, inicio + porPagina).map(livro => {
         const artigo = criar("article", "livro");
-        const botao = criar("div", "livro-capa");
-        botao.setAttribute("aria-label", livro.titulo);
+        const botao = criar("button", "livro-capa");
+        botao.type = "button";
+        botao.setAttribute("aria-label", `Ver informações de ${livro.titulo}`);
         botao.append(criarCapa(livro));
+        botao.addEventListener("click", () => abrirDetalhe(livro.id));
         artigo.append(botao);
         return artigo;
     }));
@@ -62,6 +73,7 @@ function renderizarCatalogo() {
     nav.hidden = lista.length === 0;
     function adicionarPagina(numero, rotulo, classe, desativado = false) {
         const botao = criar("button", classe, rotulo);
+        botao.type = "button";
         botao.disabled = desativado;
         botao.setAttribute("aria-label", classe === "pagina" ? `Página ${numero}` : rotulo === "‹" ? "Página anterior" : "Próxima página");
         if (classe === "pagina" && numero === pagina) botao.setAttribute("aria-current", "page");
@@ -103,9 +115,14 @@ function renderizarDestaques() {
     $("destaque-livros").replaceChildren(...lista.map((livro, i) => {
         const botao = criar("button", "destaque-livro");
         botao.type = "button";
-        botao.setAttribute("aria-label", `Destacar ${livro.titulo}`);
+        botao.setAttribute("aria-label", `Destacar e ver ${livro.titulo}`);
         botao.append(criarCapa(livro));
-        botao.addEventListener("click", () => { selecionarDestaque(i); });
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        const uso = document.createElementNS("http://www.w3.org/2000/svg", "use");
+        svg.classList.add("icone", "destaque-abrir");
+        svg.setAttribute("aria-hidden", "true");
+        uso.setAttribute("href", "#icone-seta"); svg.append(uso); botao.append(svg);
+        botao.addEventListener("click", () => { if (destaque === i) abrirDetalhe(livro.id); else selecionarDestaque(i); });
         botao.addEventListener("pointerenter", evento => { if (evento.pointerType === "mouse") selecionarDestaque(i); });
         return botao;
     }));
@@ -120,6 +137,30 @@ function filtrar() { pagina = 1; renderizarCatalogo(); }
 function fecharFiltros() { $("filtros-opcoes").classList.remove("aberto"); $("abrir-filtros").setAttribute("aria-expanded", "false"); }
 
 function limparBusca() { $("form-busca").reset(); filtrar(); $("busca").focus({ preventScroll: true }); }
+
+function abrirModal(modal) {
+    if (!document.querySelector("dialog[open]")) acionadorModal = document.activeElement;
+    document.querySelectorAll("dialog[open]").forEach(aberto => aberto.close());
+    modal.showModal();
+}
+
+function fecharModal(modal) {
+    modal.close();
+    if (acionadorModal?.isConnected) acionadorModal.focus({ preventScroll: true });
+}
+
+function abrirDetalhe(id) {
+    const livro = livros.find(item => item.id === id);
+    if (!livro) return;
+    livroAberto = id;
+    $("detalhe-capa").replaceChildren(criarCapa(livro));
+    $("detalhe-titulo").textContent = livro.titulo;
+    $("detalhe-autor").textContent = [livro.autor, livro.ano].filter(Boolean).join(", ") || "Autor e ano não informados";
+    $("detalhe-resumo").textContent = livro.resumo || "Resumo não informado.";
+    $("detalhe-paginas").textContent = `páginas: ${livro.paginas || "não informado"}`;
+    $("detalhe-editora").textContent = livro.editora || "Editora não informada";
+    abrirModal($("modal-detalhe"));
+}
 
 $("form-busca").addEventListener("submit", evento => {
     evento.preventDefault();
@@ -146,6 +187,15 @@ mobile.addEventListener("change", () => {
     pagina = 1;
     fecharFiltros();
     renderizarCatalogo();
+});
+
+document.querySelectorAll("dialog").forEach(modal => {
+    modal.querySelectorAll("[data-fechar]").forEach(botao => botao.addEventListener("click", () => fecharModal(modal)));
+    modal.addEventListener("cancel", evento => { evento.preventDefault(); fecharModal(modal); });
+    modal.addEventListener("click", evento => {
+        const area = modal.getBoundingClientRect();
+        if (evento.target === modal && (evento.clientX < area.left || evento.clientX > area.right || evento.clientY < area.top || evento.clientY > area.bottom)) fecharModal(modal);
+    });
 });
 
 const botaoMenu = document.querySelector(".nav-abrir");
