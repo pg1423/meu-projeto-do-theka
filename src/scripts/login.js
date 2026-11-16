@@ -1,4 +1,3 @@
-
 const botoesOlho = document.querySelectorAll('[data-mostrar-senha]');
 
 botoesOlho.forEach(function (botao) {
