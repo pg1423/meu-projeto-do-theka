@@ -72,7 +72,7 @@
             </div>
             <div class="catalogo-grade">
                 <div class="grade-livros" id="grade-livros"></div>
-                <button class="adicionar-livro" id="adicionar" type="button" disabled aria-label="Adicionar material" title="Adicionar material"><span aria-hidden="true">+</span></button>
+                <button class="adicionar-livro" id="adicionar" type="button" aria-label="Adicionar material" title="Adicionar material"><span aria-hidden="true">+</span></button>
             </div>
             <div class="vazio" id="vazio" hidden>
                 <h3>Nenhum livro encontrado</h3>
@@ -80,6 +80,7 @@
                 <button class="botao botao-contorno" id="recomecar-busca" type="button">Limpar busca</button>
             </div>
             <nav class="paginacao" id="paginacao" aria-label="Páginas do catálogo"></nav>
+            <p class="aviso-local sr-only" id="aviso-local">Catálogo demonstrativo. As alterações ficam somente neste navegador.</p>
         </section>
     </main>
     <footer class="rodape" id="sobre">
@@ -116,8 +117,56 @@
             <h2 id="detalhe-titulo"></h2><p id="detalhe-autor" class="detalhe-autor"></p>
             <p id="detalhe-resumo" class="detalhe-resumo"></p>
             <p id="detalhe-paginas" class="detalhe-paginas"></p><p id="detalhe-editora" class="detalhe-editora"></p>
+            <button class="botao" id="editar-livro" type="button">Editar</button>
         </div>
     </dialog>
-    <noscript><p class="sem-js">Ative o JavaScript para pesquisar os livros.</p></noscript>
+    <dialog class="modal modal-editor" id="modal-editor" aria-labelledby="editor-titulo">
+        <button class="fechar" type="button" data-fechar aria-label="Fechar formulário">×</button>
+        <div class="editor-nav"><button type="button" class="editor-voltar" data-fechar aria-label="Voltar ao acervo"><img src="../assets/acervo/simbolo.svg" alt="" width="54" height="54"></button><span><img src="../assets/acervo/logo-nav.svg" alt="Theka" width="145" height="40"></span></div>
+        <h2 id="editor-titulo">Adicionar material ao catálogo</h2>
+        <form id="form-livro">
+            <div class="editor-grade">
+                <div class="editor-capa">
+                    <div id="capa-previa"></div>
+                    <label class="botao botao-contorno arquivo-botao" for="arquivo-capa">Adicionar imagem</label>
+                    <input class="arquivo-input" id="arquivo-capa" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="erro-formulario">
+                </div>
+                <div class="editor-campos">
+                    <label class="campo campo-titulo">Título do material:
+                        <input id="livro-titulo" name="titulo" required maxlength="120" placeholder="Título do material">
+                    </label>
+                    <label class="campo campo-paginas">Número de páginas
+                        <input id="livro-paginas" name="paginas" type="number" min="1" max="50000" step="1" required placeholder="Número de páginas">
+                    </label>
+                    <label class="campo campo-isbn">ISBN
+                        <input id="livro-isbn" name="isbn" maxlength="25" placeholder="ISBN">
+                    </label>
+                    <label class="campo campo-autor">Autor:
+                        <input id="livro-autor" name="autor" required maxlength="120" placeholder="Nome do autor">
+                    </label>
+                    <label class="campo campo-ano">Ano de publicação
+                        <input id="livro-ano" name="ano" type="number" min="1" max="2100" step="1" required placeholder="Ano de publicação">
+                    </label>
+                    <label class="campo campo-editora">Editora
+                        <input id="livro-editora" name="editora" required maxlength="80" placeholder="Editora">
+                    </label>
+                    <label class="campo campo-categoria">Gênero:
+                        <input id="livro-categoria" name="categoria" required maxlength="80" placeholder="Gênero do livro">
+                    </label>
+                    <label class="campo campo-resumo">Resumo do material:
+                        <textarea id="livro-resumo" name="resumo" rows="4" required maxlength="2000" placeholder="Resumo do material"></textarea>
+                    </label>
+                    <div class="editor-acoes">
+                        <button class="botao botao-contorno excluir-livro" id="excluir-livro" type="button" hidden>Excluir</button>
+                        <div class="acoes"><button class="botao botao-contorno" id="cancelar-editor" type="button">Cancelar</button><button class="botao" id="salvar-livro" type="submit">Salvar</button></div>
+                    </div>
+                </div>
+            </div>
+            <p class="erro-formulario" id="erro-formulario" role="alert" hidden></p>
+        </form>
+    </dialog>
+
+    <div class="notificacao" id="notificacao" role="status" aria-live="polite" hidden></div>
+    <noscript><p class="sem-js">Ative o JavaScript para pesquisar e gerenciar os livros.</p></noscript>
 </body>
 </html>
