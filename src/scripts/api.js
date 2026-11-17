@@ -1,7 +1,7 @@
 const API_URL = 'https://thekapitrainee.pythonanywhere.com';
 const TEMPO_LIMITE = 15000;
 
-// Primeira etapa: somente o login está conectado à API.
+// Integração das telas de login e cadastro.
 export async function entrarNaApi(email, senha) {
     const controle = new AbortController();
     const temporizador = setTimeout(() => controle.abort(), TEMPO_LIMITE);
@@ -62,6 +62,85 @@ export async function entrarNaApi(email, senha) {
             throw new Error('Não foi possível conectar à API. Confira sua conexão e tente novamente.');
         }
 
+        throw falha;
+    } finally {
+        clearTimeout(temporizador);
+    }
+}
+
+export async function cadastrarNaApi({ nome, email, senha, confirmacao }) {
+    const partesNome = nome.trim().split(/\s+/);
+    const emailNormalizado = email.trim().toLowerCase();
+    // O mockup não pede um nome de usuário. A API usa e-mail para entrar.
+    const usuario = /^[\w.@+-]{1,150}$/.test(emailNormalizado)
+        ? emailNormalizado
+        : `theka_${crypto.randomUUID()}`;
+    const controle = new AbortController();
+    const temporizador = setTimeout(() => controle.abort(), TEMPO_LIMITE);
+    const semConfirmacao = 'Não foi possível confirmar o cadastro. Tente entrar com os dados informados antes de enviar novamente.';
+
+    try {
+        const resposta = await fetch(`${API_URL}/users/`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'omit',
+            cache: 'no-store',
+            signal: controle.signal,
+            body: JSON.stringify({
+                username: usuario,
+                email: emailNormalizado,
+                first_name: partesNome[0],
+                last_name: partesNome.slice(1).join(' '),
+                password: senha,
+                password_confirm: confirmacao
+            })
+        });
+
+        if (resposta.status === 429) {
+            throw new Error('Muitas tentativas de cadastro. Aguarde um pouco e tente novamente.');
+        }
+
+        if (resposta.status >= 500) {
+            throw new Error(semConfirmacao);
+        }
+
+        let dados;
+        try {
+            dados = await resposta.json();
+        } catch (falha) {
+            if (controle.signal.aborted) throw falha;
+            throw new Error(resposta.ok ? semConfirmacao : 'O serviço de cadastro está indisponível. Tente novamente mais tarde.');
+        }
+
+        if (!resposta.ok) {
+            const rotulos = {
+                email: 'E-mail', username: 'Conta', password: 'Senha',
+                password_confirm: 'Confirmar senha', first_name: 'Nome',
+                last_name: 'Sobrenome', non_field_errors: '', detail: ''
+            };
+            const mensagens = dados && typeof dados === 'object' && !Array.isArray(dados)
+                ? Object.entries(dados).flatMap(([campo, valor]) => {
+                    const textos = (Array.isArray(valor) ? valor : [valor])
+                        .filter(item => typeof item === 'string');
+                    return textos.map(texto => rotulos[campo] ? `${rotulos[campo]}: ${texto}` : texto);
+                })
+                : [];
+            throw new Error(mensagens.join(' ') || 'Não foi possível cadastrar. Confira os dados e tente novamente.');
+        }
+
+        if (resposta.status !== 201 || !Number.isInteger(dados?.id) || dados.id <= 0 ||
+            typeof dados.email !== 'string' || dados.email.toLowerCase() !== emailNormalizado) {
+            throw new Error(semConfirmacao);
+        }
+
+        return dados;
+    } catch (falha) {
+        if (controle.signal.aborted || falha instanceof TypeError) {
+            throw new Error(semConfirmacao);
+        }
         throw falha;
     } finally {
         clearTimeout(temporizador);

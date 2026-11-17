@@ -32,6 +32,11 @@ function mostrarMensagem(texto, erro = false) {
 }
 
 if (formulario) {
+    if (formulario.dataset.formulario === 'login' &&
+        new URLSearchParams(window.location.search).get('cadastro') === 'sucesso') {
+        mostrarMensagem('Conta criada com sucesso. Entre com seu e-mail e senha.');
+    }
+
     formulario.addEventListener('input', function () {
         const aviso = document.querySelector('#mensagem-formulario');
         if (!enviando) {
@@ -79,7 +84,18 @@ if (formulario) {
             }
         }
 
-        if (pagina === 'login') {
+        if (pagina === 'cadastro') {
+            const senha = formulario.querySelector('[name="senha"]');
+            if (senha.value.length < 8 || senha.value.length > 128 ||
+                !/[A-Z]/.test(senha.value) || !/[a-z]/.test(senha.value) ||
+                !/[0-9]/.test(senha.value) || !/[!@#$%^&*(),.?":{}|<>]/.test(senha.value)) {
+                mostrarMensagem('Use uma senha de 8 a 128 caracteres, com letra maiúscula, minúscula, número e símbolo, como !, @ ou #.', true);
+                senha.focus();
+                return;
+            }
+        }
+
+        if (pagina === 'login' || pagina === 'cadastro') {
             const senha = formulario.querySelector('[name="senha"]');
             const botao = formulario.querySelector('[type="submit"]');
             const textoOriginal = botao.textContent;
@@ -88,27 +104,37 @@ if (formulario) {
 
             enviando = true;
             botao.disabled = true;
-            botao.textContent = 'Entrando...';
+            botao.textContent = pagina === 'login' ? 'Entrando...' : 'Salvando...';
             formulario.setAttribute('aria-busy', 'true');
             mostrarMensagem('Conectando à API...');
             campos.forEach(campo => { campo.disabled = true; });
 
             try {
-                const { entrarNaApi } = await import('./api.js');
-                const acesso = await entrarNaApi(email.value, senha.value);
-
-                try {
-                    sessionStorage.setItem(CHAVE_ACESSO, acesso);
-                } catch {
-                    throw new Error('O login foi confirmado, mas não foi possível guardar a sessão neste navegador.');
+                const api = await import('./api.js');
+                if (pagina === 'cadastro') {
+                    await api.cadastrarNaApi({
+                        nome: nome.value,
+                        email: email.value,
+                        senha: senha.value,
+                        confirmacao: formulario.querySelector('[name="confirmar-senha"]').value
+                    });
+                    formulario.reset();
+                    mostrarMensagem('Conta criada com sucesso. Abrindo o login...');
+                    window.location.assign('login.html?cadastro=sucesso');
+                } else {
+                    const acesso = await api.entrarNaApi(email.value, senha.value);
+                    try {
+                        sessionStorage.setItem(CHAVE_ACESSO, acesso);
+                    } catch {
+                        throw new Error('O login foi confirmado, mas não foi possível guardar a sessão neste navegador.');
+                    }
+                    senha.value = '';
+                    window.location.assign('acervo.html');
                 }
-
-                senha.value = '';
-                window.location.assign('acervo.html');
             } catch (falha) {
                 const mensagem = falha instanceof TypeError
                     ? 'Não foi possível carregar a integração. Abra o projeto pelo servidor e confira o arquivo src/scripts/api.js.'
-                    : falha.message || 'Não foi possível entrar. Tente novamente.';
+                    : falha.message || 'Não foi possível concluir a solicitação. Tente novamente.';
                 mostrarMensagem(mensagem, true);
             } finally {
                 enviando = false;
@@ -124,10 +150,6 @@ if (formulario) {
         } else if (pagina === 'redefinicao') {
             mostrarMensagem(
                 'Senhas conferidas. Nenhuma senha foi alterada.'
-            );
-        } else if (pagina === 'cadastro') {
-            mostrarMensagem(
-                'Formulário conferido. Nenhum cadastro foi realizado.'
             );
         }
     });
