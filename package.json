@@ -1,0 +1,14 @@
+{
+  "name": "meu-projeto-do-theka",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Meu projeto do Theka — acervo virtual em HTML, CSS e JavaScript.",
+  "type": "module",
+  "scripts": {
+    "dev": "node tools/servidor.mjs",
+    "check": "node tools/verificar.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
