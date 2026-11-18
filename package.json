@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "node tools/servidor.mjs",
-    "check": "node tools/verificar.mjs"
+    "check": "node tools/verificar.mjs",
+    "test": "node --test tests/*.test.mjs"
   },
   "engines": {
     "node": ">=20"

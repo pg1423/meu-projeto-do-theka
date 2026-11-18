@@ -32,14 +32,35 @@ function mostrarMensagem(texto, erro = false) {
 }
 
 if (formulario) {
-    if (formulario.dataset.formulario === 'login' &&
-        new URLSearchParams(window.location.search).get('cadastro') === 'sucesso') {
-        mostrarMensagem('Conta criada com sucesso. Entre com seu e-mail e senha.');
+    const pagina = formulario.dataset.formulario;
+    const parametros = new URLSearchParams(window.location.search);
+    const uid = parametros.get('uid');
+    const token = parametros.get('token');
+    let linkInvalido = false;
+
+    function bloquearRedefinicao() {
+        linkInvalido = true;
+        formulario.querySelector('[type="submit"]').disabled = true;
+        formulario.querySelectorAll('input').forEach(campo => { campo.disabled = true; });
+        mostrarMensagem('Link inválido ou expirado. Volte para recuperar senha e solicite um novo e-mail.', true);
+    }
+
+    if (pagina === 'redefinicao' && (!uid?.trim() || !token?.trim() ||
+        parametros.getAll('uid').length !== 1 || parametros.getAll('token').length !== 1)) {
+        bloquearRedefinicao();
+    }
+
+    if (pagina === 'login') {
+        if (parametros.get('senha') === 'redefinida') {
+            mostrarMensagem('Senha redefinida com sucesso. Entre com sua nova senha.');
+        } else if (parametros.get('cadastro') === 'sucesso') {
+            mostrarMensagem('Conta criada com sucesso. Entre com seu e-mail e senha.');
+        }
     }
 
     formulario.addEventListener('input', function () {
         const aviso = document.querySelector('#mensagem-formulario');
-        if (!enviando) {
+        if (!enviando && !linkInvalido) {
             aviso.hidden = true;
             aviso.textContent = '';
         }
@@ -48,7 +69,7 @@ if (formulario) {
     formulario.addEventListener('submit', async function (evento) {
         evento.preventDefault();
 
-        if (enviando) return;
+        if (enviando || linkInvalido) return;
 
         const nome = formulario.querySelector('[name="nome"]');
         const email = formulario.querySelector('input[type="email"]');
@@ -64,8 +85,6 @@ if (formulario) {
         if (!formulario.reportValidity()) {
             return;
         }
-
-        const pagina = formulario.dataset.formulario;
 
         if (pagina === 'cadastro' || pagina === 'redefinicao') {
             const senha = formulario.querySelector('[name="senha"]');
@@ -95,7 +114,17 @@ if (formulario) {
             }
         }
 
-        if (pagina === 'login' || pagina === 'cadastro') {
+        // O endpoint de redefinição exige apenas 8 caracteres e confirmação igual.
+        if (pagina === 'redefinicao') {
+            const senha = formulario.querySelector('[name="senha"]');
+            if (senha.value.trim().length < 8) {
+                mostrarMensagem('A nova senha deve ter pelo menos 8 caracteres.', true);
+                senha.focus();
+                return;
+            }
+        }
+
+        if (['login', 'cadastro', 'recuperacao', 'redefinicao'].includes(pagina)) {
             const senha = formulario.querySelector('[name="senha"]');
             const botao = formulario.querySelector('[type="submit"]');
             const textoOriginal = botao.textContent;
@@ -104,7 +133,8 @@ if (formulario) {
 
             enviando = true;
             botao.disabled = true;
-            botao.textContent = pagina === 'login' ? 'Entrando...' : 'Salvando...';
+            botao.textContent = pagina === 'login' ? 'Entrando...'
+                : pagina === 'recuperacao' ? 'Enviando...' : 'Salvando...';
             formulario.setAttribute('aria-busy', 'true');
             mostrarMensagem('Conectando à API...');
             campos.forEach(campo => { campo.disabled = true; });
@@ -121,6 +151,21 @@ if (formulario) {
                     formulario.reset();
                     mostrarMensagem('Conta criada com sucesso. Abrindo o login...');
                     window.location.assign('login.html?cadastro=sucesso');
+                } else if (pagina === 'recuperacao') {
+                    await api.recuperarSenhaNaApi(email.value);
+                    mostrarMensagem('E-mail de recuperação enviado. Confira sua caixa de entrada e a pasta de spam.');
+                } else if (pagina === 'redefinicao') {
+                    await api.redefinirSenhaNaApi({
+                        uid,
+                        token,
+                        senha: senha.value,
+                        confirmacao: formulario.querySelector('[name="confirmar-senha"]').value
+                    });
+                    formulario.reset();
+                    // A senha mudou: descarte a sessão anterior deste navegador.
+                    try { sessionStorage.removeItem(CHAVE_ACESSO); } catch { /* Sem sessão local disponível. */ }
+                    mostrarMensagem('Senha redefinida com sucesso. Abrindo o login...');
+                    window.location.replace('login.html?senha=redefinida');
                 } else {
                     const acesso = await api.entrarNaApi(email.value, senha.value);
                     try {
@@ -132,25 +177,21 @@ if (formulario) {
                     window.location.assign('acervo.html');
                 }
             } catch (falha) {
-                const mensagem = falha instanceof TypeError
-                    ? 'Não foi possível carregar a integração. Abra o projeto pelo servidor e confira o arquivo src/scripts/api.js.'
-                    : falha.message || 'Não foi possível concluir a solicitação. Tente novamente.';
-                mostrarMensagem(mensagem, true);
+                if (pagina === 'redefinicao' && falha.codigo === 'link_invalido') {
+                    bloquearRedefinicao();
+                } else {
+                    const mensagem = falha instanceof TypeError
+                        ? 'Não foi possível carregar a integração. Abra o projeto pelo servidor e confira o arquivo src/scripts/api.js.'
+                        : falha.message || 'Não foi possível concluir a solicitação. Tente novamente.';
+                    mostrarMensagem(mensagem, true);
+                }
             } finally {
                 enviando = false;
-                botao.disabled = false;
+                botao.disabled = linkInvalido;
                 botao.textContent = textoOriginal;
                 formulario.removeAttribute('aria-busy');
-                campos.forEach((campo, indice) => { campo.disabled = estados[indice]; });
+                campos.forEach((campo, indice) => { campo.disabled = linkInvalido || estados[indice]; });
             }
-        } else if (pagina === 'recuperacao') {
-            mostrarMensagem(
-                'E-mail conferido. Nenhuma mensagem foi enviada.'
-            );
-        } else if (pagina === 'redefinicao') {
-            mostrarMensagem(
-                'Senhas conferidas. Nenhuma senha foi alterada.'
-            );
         }
     });
 }

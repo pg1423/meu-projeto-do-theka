@@ -1,7 +1,7 @@
 const API_URL = 'https://thekapitrainee.pythonanywhere.com';
 const TEMPO_LIMITE = 15000;
 
-// Integração das telas de login e cadastro.
+// Integração das telas de autenticação.
 export async function entrarNaApi(email, senha) {
     const controle = new AbortController();
     const temporizador = setTimeout(() => controle.abort(), TEMPO_LIMITE);
@@ -145,4 +145,100 @@ export async function cadastrarNaApi({ nome, email, senha, confirmacao }) {
     } finally {
         clearTimeout(temporizador);
     }
+}
+
+function erroDeLink() {
+    const erro = new Error('Link inválido ou expirado. Volte para recuperar senha e solicite um novo e-mail.');
+    erro.codigo = 'link_invalido';
+    return erro;
+}
+
+async function enviarPedidoDeSenha(caminho, campos, redefinicao = false) {
+    const controle = new AbortController();
+    const temporizador = setTimeout(() => controle.abort(), TEMPO_LIMITE);
+    const semConfirmacao = redefinicao
+        ? 'Não foi possível confirmar a alteração. Tente entrar com a nova senha antes de solicitar outro link.'
+        : 'Não foi possível confirmar o envio. Confira sua caixa de entrada e o spam antes de tentar novamente.';
+
+    try {
+        const resposta = await fetch(`${API_URL}${caminho}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'omit',
+            cache: 'no-store',
+            referrerPolicy: 'no-referrer',
+            signal: controle.signal,
+            body: JSON.stringify(campos)
+        });
+
+        if (resposta.status === 429) {
+            throw new Error('Muitas tentativas. Aguarde um pouco e tente novamente.');
+        }
+
+        if (resposta.status >= 500) {
+            throw new Error(semConfirmacao);
+        }
+
+        let dados;
+        try {
+            dados = await resposta.json();
+        } catch (falha) {
+            if (controle.signal.aborted) throw falha;
+            throw new Error(semConfirmacao);
+        }
+
+        if (!resposta.ok) {
+            if (redefinicao && (dados?.uid || dados?.token)) {
+                throw erroDeLink();
+            }
+
+            const rotulos = {
+                email: 'E-mail', new_password: 'Nova senha',
+                new_password_confirm: 'Confirmar nova senha',
+                non_field_errors: '', detail: ''
+            };
+            const mensagens = dados && typeof dados === 'object' && !Array.isArray(dados)
+                ? Object.entries(dados).flatMap(([campo, valor]) => {
+                    if (!Object.hasOwn(rotulos, campo)) return [];
+                    return (Array.isArray(valor) ? valor : [valor])
+                        .filter(texto => typeof texto === 'string')
+                        .map(texto => rotulos[campo] ? `${rotulos[campo]}: ${texto}` : texto);
+                })
+                : [];
+            throw new Error(mensagens.join(' ') || 'Não foi possível concluir. Confira os dados e tente novamente.');
+        }
+
+        if (resposta.status !== 200 || typeof dados?.message !== 'string' || !dados.message.trim()) {
+            throw new Error(semConfirmacao);
+        }
+    } catch (falha) {
+        if (controle.signal.aborted || falha instanceof TypeError) {
+            throw new Error(semConfirmacao);
+        }
+        throw falha;
+    } finally {
+        clearTimeout(temporizador);
+    }
+}
+
+export async function recuperarSenhaNaApi(email) {
+    await enviarPedidoDeSenha('/auth/password/reset/', {
+        email: email.trim().toLowerCase()
+    });
+}
+
+export async function redefinirSenhaNaApi({ uid, token, senha, confirmacao }) {
+    if (typeof uid !== 'string' || !uid.trim() || typeof token !== 'string' || !token.trim()) {
+        throw erroDeLink();
+    }
+
+    await enviarPedidoDeSenha('/auth/password/reset/confirm/', {
+        uid,
+        token,
+        new_password: senha,
+        new_password_confirm: confirmacao
+    }, true);
 }
