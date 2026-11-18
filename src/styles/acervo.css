@@ -123,7 +123,12 @@ h1 { color: var(--rosa); font-size: calc(96 * var(--u)); line-height: calc(100 *
 .pagina { display: grid; place-items: center; width: calc(62 * var(--u)); height: calc(62 * var(--u)); padding: 0; border: 0; border-radius: 50%; font-size: calc(32 * var(--u)); color: #b8b8b8; }
 .pagina[aria-current="page"] { color: white; background: var(--rosa); font-weight: 700; }
 .seta { display: grid; place-items: center; width: calc(38 * var(--u)); height: calc(38 * var(--u)); padding: 0; border: 0; border-radius: 50%; color: white; background: var(--rosa-seta); font-size: calc(25 * var(--u)); }
-.aviso-local:not(.sr-only) { margin-top: 24px; padding: 14px; background: var(--rosa-claro); font-size: 14px; }
+.estado-acervo { padding: 24px; border-radius: 16px; background: var(--rosa-claro); font-size: 16px; line-height: 1.5; }
+.estado-acervo button { margin-top: 12px; }
+#estado-opcoes { margin-top: 16px; }
+#recarregar-novidades { margin-top: 14px; font-size: 16px; }
+#entrar-editor, #conferir-acervo { display: inline-block; margin-top: 12px; }
+.catalogo[aria-busy="true"] .adicionar-livro { visibility: hidden; }
 .rodape { display: flex; flex-direction: column; min-height: calc(318 * var(--u)); margin-top: calc(156 * var(--u)); padding: calc(52 * var(--u)) 0 calc(28 * var(--u)); background: var(--rosa); color: white; }
 .rodape-conteudo { width: calc(1200 * var(--u)); margin: 0 auto; display: grid; grid-template-columns: 245fr 260fr 300fr 200fr; gap: calc(65 * var(--u)); }
 .rodape-logo { display: block; width: calc(245 * var(--u)); height: calc(68 * var(--u)); margin: calc(6 * var(--u)) 0 calc(20 * var(--u)); background: #f36ec7; mask: url("../assets/acervo/logo-rodape.svg") center / contain no-repeat; }
@@ -164,9 +169,9 @@ h1 { color: var(--rosa); font-size: calc(96 * var(--u)); line-height: calc(100 *
 .editor-capa.com-imagem:hover .arquivo-botao, .editor-capa.com-imagem:focus-within .arquivo-botao { opacity: 1; }
 .editor-campos { display: grid; grid-template-columns: 421fr 176fr 176fr; align-content: start; gap: 14px 20px; }
 .campo { display: flex; flex-direction: column; gap: 5px; min-width: 0; color: var(--rosa); font-size: 18px; font-weight: 400; line-height: 25px; }
-.campo input, .campo textarea { width: 100%; min-width: 0; height: 40px; padding: 8px 20px; border: 1px solid var(--rosa); border-radius: 22px; color: var(--texto); background: white; font-size: 14px; font-weight: 400; }
+.campo input, .campo textarea, .campo select { width: 100%; min-width: 0; height: 40px; padding: 8px 20px; border: 1px solid var(--rosa); border-radius: 22px; color: var(--texto); background: white; font-size: 14px; font-weight: 400; }
 .campo input::placeholder, .campo textarea::placeholder { color: #a86787; opacity: 1; }
-.campo-editora input { height: 44px; }
+.campo-editora select { height: 44px; }
 .campo textarea { height: 133px; resize: vertical; border-radius: 20px; line-height: 20px; }
 .campo-categoria, .campo-resumo { grid-column: 1 / -1; }
 .editor-acoes { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 16px; margin-top: 9px; }

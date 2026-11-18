@@ -44,8 +44,9 @@
             <div class="destaque-texto">
                 <h1 id="titulo-destaques"><span class="titulo-desktop">Novidades<br>da semana</span><span class="titulo-mobile">Novidade da semana</span></h1>
                 <div class="destaque-descricao" aria-live="polite">
-                    <p class="destaque-titulo" id="destaque-titulo"></p>
+                    <p class="destaque-titulo" id="destaque-titulo">Carregando novidades...</p>
                     <p class="destaque-autor" id="destaque-autor"></p>
+                    <button class="link-botao" id="recarregar-novidades" type="button" hidden>Tentar novamente</button>
                 </div>
             </div>
             <div class="destaque-livros" id="destaque-livros" role="group" aria-label="Livros em destaque"></div>
@@ -60,27 +61,34 @@
                 <button class="botao buscar-submit" type="submit"><span>Buscar</span> <svg class="icone" aria-hidden="true"><use href="#icone-busca"/></svg></button>
                 <div class="filtros-opcoes" id="filtros-opcoes">
                     <h3>Filtros</h3>
-                    <label class="sr-only" for="categoria">Gênero</label><select id="categoria" name="categoria"><option value="">Gênero</option></select>
-                    <label class="sr-only" for="editora">Editora</label><select id="editora" name="editora"><option value="">Editora</option></select>
+                    <label class="sr-only" for="categoria">Gênero</label><select id="categoria" name="categoria" disabled><option value="">Gênero</option></select>
+                    <label class="sr-only" for="editora">Editora</label><select id="editora" name="editora" disabled><option value="">Editora</option></select>
                     <button class="botao aplicar-filtros" type="submit">Aplicar</button>
                 </div>
                 <button class="abrir-filtros botao" id="abrir-filtros" type="button" aria-label="Abrir filtros" aria-controls="filtros-opcoes" aria-expanded="false"><svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v7l-4-2v-5Z"/></svg></button>
             </form>
+            <div class="estado-acervo" id="estado-opcoes" hidden>
+                <p id="mensagem-opcoes" role="alert"></p>
+                <button class="link-botao" id="recarregar-opcoes" type="button">Carregar gêneros e editoras</button>
+            </div>
             <div class="resultado-barra">
                 <p class="sr-only" id="resultados" role="status" aria-live="polite"></p>
                 <button class="link-botao" id="limpar-busca" type="button" hidden>Limpar busca</button>
             </div>
+            <div class="estado-acervo" id="estado-acervo">
+                <p id="mensagem-acervo" role="status">Carregando livros...</p>
+                <button class="botao botao-contorno" id="recarregar-acervo" type="button" hidden>Tentar novamente</button>
+            </div>
             <div class="catalogo-grade">
                 <div class="grade-livros" id="grade-livros"></div>
-                <button class="adicionar-livro" id="adicionar" type="button" aria-label="Adicionar material" title="Adicionar material"><span aria-hidden="true">+</span></button>
+                <button class="adicionar-livro" id="adicionar" type="button" aria-label="Adicionar material" title="Adicionar material" disabled><span aria-hidden="true">+</span></button>
             </div>
             <div class="vazio" id="vazio" hidden>
-                <h3>Nenhum livro encontrado</h3>
-                <p>Tente outro título ou autor.</p>
+                <h3 id="vazio-titulo">Nenhum livro encontrado</h3>
+                <p id="vazio-texto">Tente outro título, autor ou filtro.</p>
                 <button class="botao botao-contorno" id="recomecar-busca" type="button">Limpar busca</button>
             </div>
             <nav class="paginacao" id="paginacao" aria-label="Páginas do catálogo"></nav>
-            <p class="aviso-local sr-only" id="aviso-local">Catálogo demonstrativo. As alterações ficam somente neste navegador.</p>
         </section>
     </main>
     <footer class="rodape" id="sobre">
@@ -117,6 +125,7 @@
             <h2 id="detalhe-titulo"></h2><p id="detalhe-autor" class="detalhe-autor"></p>
             <p id="detalhe-resumo" class="detalhe-resumo"></p>
             <p id="detalhe-paginas" class="detalhe-paginas"></p><p id="detalhe-editora" class="detalhe-editora"></p>
+            <p id="detalhe-estado" class="erro-formulario" role="alert" hidden></p>
             <button class="botao" id="editar-livro" type="button">Editar</button>
         </div>
     </dialog>
@@ -124,7 +133,7 @@
         <button class="fechar" type="button" data-fechar aria-label="Fechar formulário">×</button>
         <div class="editor-nav"><button type="button" class="editor-voltar" data-fechar aria-label="Voltar ao acervo"><img src="../assets/acervo/simbolo.svg" alt="" width="54" height="54"></button><span><img src="../assets/acervo/logo-nav.svg" alt="Theka" width="145" height="40"></span></div>
         <h2 id="editor-titulo">Adicionar material ao catálogo</h2>
-        <form id="form-livro">
+        <form id="form-livro" method="post">
             <div class="editor-grade">
                 <div class="editor-capa">
                     <div id="capa-previa"></div>
@@ -133,28 +142,28 @@
                 </div>
                 <div class="editor-campos">
                     <label class="campo campo-titulo">Título do material:
-                        <input id="livro-titulo" name="titulo" required maxlength="120" placeholder="Título do material">
+                        <input id="livro-titulo" name="titulo" required maxlength="255" placeholder="Título do material">
                     </label>
                     <label class="campo campo-paginas">Número de páginas
-                        <input id="livro-paginas" name="paginas" type="number" min="1" max="50000" step="1" required placeholder="Número de páginas">
+                        <input id="livro-paginas" name="paginas" type="number" min="1" step="1" placeholder="Número de páginas">
                     </label>
                     <label class="campo campo-isbn">ISBN
-                        <input id="livro-isbn" name="isbn" maxlength="25" placeholder="ISBN">
+                        <input id="livro-isbn" name="isbn" required maxlength="17" placeholder="ISBN">
                     </label>
                     <label class="campo campo-autor">Autor:
-                        <input id="livro-autor" name="autor" required maxlength="120" placeholder="Nome do autor">
+                        <input id="livro-autor" name="autor" required maxlength="255" placeholder="Nome do autor">
                     </label>
                     <label class="campo campo-ano">Ano de publicação
-                        <input id="livro-ano" name="ano" type="number" min="1" max="2100" step="1" required placeholder="Ano de publicação">
+                        <input id="livro-ano" name="ano" type="number" min="0" step="1" placeholder="Ano de publicação">
                     </label>
                     <label class="campo campo-editora">Editora
-                        <input id="livro-editora" name="editora" required maxlength="80" placeholder="Editora">
+                        <select id="livro-editora" name="editora" required><option value="">Selecione a editora</option></select>
                     </label>
                     <label class="campo campo-categoria">Gênero:
-                        <input id="livro-categoria" name="categoria" required maxlength="80" placeholder="Gênero do livro">
+                        <select id="livro-categoria" name="categoria" required><option value="">Selecione o gênero</option></select>
                     </label>
                     <label class="campo campo-resumo">Resumo do material:
-                        <textarea id="livro-resumo" name="resumo" rows="4" required maxlength="2000" placeholder="Resumo do material"></textarea>
+                        <textarea id="livro-resumo" name="resumo" rows="4" required placeholder="Resumo do material"></textarea>
                     </label>
                     <div class="editor-acoes">
                         <button class="botao botao-contorno excluir-livro" id="excluir-livro" type="button" hidden>Excluir</button>
@@ -163,6 +172,8 @@
                 </div>
             </div>
             <p class="erro-formulario" id="erro-formulario" role="alert" hidden></p>
+            <a class="link-botao" id="entrar-editor" href="login.html" hidden>Ir para o login</a>
+            <button class="link-botao" id="conferir-acervo" type="button" hidden>Conferir acervo</button>
         </form>
     </dialog>
 
