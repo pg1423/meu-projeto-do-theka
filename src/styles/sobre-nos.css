@@ -70,6 +70,26 @@
 .membro-maria[aria-pressed="true"] img { top: -11.692%; left: -5.245%; width: 110.489%; transform: none; }
 .sobre-membro[aria-pressed="true"] .membro-cargo { opacity: 1; }
 .sobre-page .rodape { margin-top: calc(115 * var(--sobre-u)); }
+@media (min-width: 768px) and (max-width: 1150px) {
+    .sobre-banner { height: auto; padding: 130px 32px 40px; }
+    .sobre-banner-interno { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 24px; width: 100%; height: auto; }
+    .sobre-ilustracao { position: relative; top: auto; left: auto; width: 130%; height: auto; margin-left: -28%; }
+    .sobre-apresentacao { position: static; width: auto; }
+    .sobre-apresentacao h1 { height: auto; }
+    .sobre-apresentacao h1 img { height: auto; }
+    .sobre-apresentacao p { margin-top: 24px; font-size: 16px; line-height: 1.5; }
+    .sobre-faixa li { height: 40px; font-size: 18px; }
+    .sobre-secoes { width: calc(100% - 64px); }
+    .sobre-secoes h2 { font-size: 40px; line-height: 1.15; }
+    .sobre-historia { height: auto; min-height: 340px; padding: 36px; }
+    .sobre-historia h2 { padding: 0; }
+    .sobre-historia-texto { position: relative; top: auto; left: auto; width: 70%; margin-top: 32px; font-size: 16px; line-height: 1.5; }
+    .sobre-historia-marca { top: 140px; left: calc(100% - 180px); width: 300px; height: 140px; }
+    .sobre-valor span { max-width: 90%; font-size: 20px; white-space: normal; }
+    .sobre-equipe-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+    .membro-nome { min-height: 32px; padding: 0 10px; font-size: 18px; }
+    .membro-cargo { left: 50%; min-height: 28px; padding: 0 8px; font-size: 14px; }
+}
 @media (max-width: 767px) {
     .sobre-page { --sobre-u: 1px; }
     .sobre-page .cabecalho { top: 59px; width: calc(100% - 32px); }

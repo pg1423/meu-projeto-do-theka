@@ -197,6 +197,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .auth-status--error { color: #a12622; border-color: currentColor; }
 
 .auth-layout--login .auth-title { letter-spacing: -0.05em; }
+.auth-layout--login { --acoes-intervalo: 24px; }
+.auth-layout--login .auth-actions { justify-content: center; }
 
 .auth-layout--cadastro {
     --coluna: 62.625%;

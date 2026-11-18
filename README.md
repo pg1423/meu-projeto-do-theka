@@ -16,6 +16,12 @@ Abra `http://localhost:5173`. O comando `check` verifica a sintaxe e os arquivos
 referenciados; `test` verifica a integração de senhas com respostas simuladas,
 sem enviar e-mails nem alterar contas reais.
 
+## Acervo
+
+Os livros começam com os dados de `src/data/livros.js`. As inclusões, edições e
+exclusões ficam salvas no navegador com `localStorage`. A integração do acervo
+com a API ainda precisa ser feita.
+
 ## Recuperação e redefinição de senha
 
 1. Em `src/pages/recuperar-senha.html`, o formulário envia o e-mail para
